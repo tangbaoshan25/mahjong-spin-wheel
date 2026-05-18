@@ -1470,7 +1470,7 @@ function startCountdown() {
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
-    el.textContent = `Resets in ${h}h ${m}m ${s}s`;
+    el.textContent = 'Resets in ' + h + 'h ' + m + 'm ' + s + 's';
   }
   tick();
   const timer = setInterval(() => {
@@ -1480,6 +1480,9 @@ function startCountdown() {
     tick();
   }, 1000);
 }
+
+// Double-click eventDateDisplay to trigger password modal
+document.getElementById('eventDateDisplay').addEventListener('dblclick', showPasswordModal);
 
 /* ─── Init ─── */
 window.addEventListener('DOMContentLoaded', () => {
