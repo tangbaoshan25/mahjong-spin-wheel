@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucky Spin – Mahjong $55 Deal</title>
+  <style>
+    /* ─────────────── RESET & BASE ─────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .hidden { display: none !important; }
+    :root {
+      --red:    #C0392B;
+      --gold:   #D4AF37;
+      --dark:   #1A0A00;
+      --cream:  #FDF6E3;
+      --green:  #1E6B3C;
+      --white:  #FFFFFF;
+      --shadow: 0 8px 32px rgba(0,0,0,.45);
+    }
+    body {
+      min-height: 100vh;
+      background: var(--dark);
+      background-image:
+        radial-gradient(ellipse at 20% 10%, #3D1A00 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 90%, #2A0D00 0%, transparent 55%);
+      font-family: 'Georgia', serif;
+      color: var(--cream);
+      overflow-x: hidden;
+    }
+
+    /* ─────────────── TILE PATTERN OVERLAY ─────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgba(212,175,55,.04) 0px, rgba(212,175,55,.04) 1px,
+        transparent 1px, transparent 28px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─────────────── HEADER ─────────────── */
+    header {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 20px 20px 10px;
+    }
+    .event-date-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .event-date-label {
+      font-size: .82rem;
+      color: rgba(212,175,55,.7);
+    }
+    .event-date-value {
+      font-size: .88rem;
+      color: var(--gold);
+      font-weight: bold;
+      background: rgba(212,175,55,.1);
+      border: 1px solid rgba(212,175,55,.3);
+      padding: 3px 12px;
+      border-radius: 20px;
+    }
+    .event-date-value.inactive {
+      color: #c0392b;
+      border-color: rgba(192,57,43,.4);
+      background: rgba(192,57,43,.1);
+    }
+    .event-date-edit-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: .9rem;
+      opacity: .6;
+      transition: opacity .2s;
+      padding: 2px 6px;
+    }
+    .event-date-edit-btn:hover { opacity: 1; }
+    .date-edit-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a0a00;
+      border: 1.5px solid rgba(212,175,55,.4);
+      border-radius: 16px;
+      padding: 18px 20px;
+      z-index: 50;
+      box-shadow: 0 12px 40px rgba(0,0,0,.6);
+      white-space: nowrap;
+    }
+    .date-edit-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .date-edit-row label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: .75rem;
+      color: rgba(212,175,55,.7);
+    }
+    .date-edit-row input[type="date"] {
+      font-size: .82rem;
+      color: var(--gold);
+      background: rgba(212,175,55,.1);
+      border: 1px solid rgba(212,175,55,.5);
+      border-radius: 10px;
+      padding: 5px 10px;
+      outline: none;
+    }
+    .date-edit-row input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.7);
+      cursor: pointer;
+    }
+    .date-edit-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    .event-date-save-btn, .event-date-cancel-btn {
+      font-size: .75rem;
+      padding: 5px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+      transition: opacity .2s;
+    }
+    .event-date-save-btn {
+      background: var(--green);
+      color: #fff;
+    }
+    .event-date-cancel-btn {
+      background: rgba(255,255,255,.08);
+      color: #d4b896;
+    }
+    .event-date-save-btn:hover, .event-date-cancel-btn:hover { opacity: .8; }
+    .header-badge {
+      display: inline-block;
+      background: var(--red);
+      color: var(--gold);
+      font-size: .75rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      padding: 4px 18px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      border: 1.5px solid var(--gold);
+    }
+    header h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--gold);
+      text-shadow: 0 2px 12px rgba(212,175,55,.5);
+      line-height: 1.15;
+      letter-spacing: .04em;
+    }
+    header h1 span { color: var(--white); }
+    header p.subtitle {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #d4b896;
+      max-width: 560px;
+      margin-inline: auto;
+      line-height: 1.6;
+    }
+
+    /* ─────────────── RULES STRIP ─────────────── */
+    .rules-strip {
+      position: relative; z-index: 1;
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      padding: 18px 20px;
+      margin: 18px auto;
+      max-width: 780px;
+      background: rgba(212,175,55,.07);
+      border: 1px solid rgba(212,175,55,.22);
+      border-radius: 12px;
+    }
+    .rule-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .88rem; color: #e8d5b0;
+    }
+    .rule-icon { font-size: 1.3rem; }
+
+    /* ─────────────── MAIN LAYOUT ─────────────── */
+    .game-wrapper {
+      position: relative; z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+      padding: 10px 20px 50px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ─────────────── WHEEL SECTION ─────────────── */
+    .wheel-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+    .used-today-overlay {
+      position: fixed; inset: 0; z-index: 150;
+      background: rgba(0,0,0,.85);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Georgia', serif;
+    }
+    .used-today-overlay.hidden { display: none; }
+    .used-today-modal {
+      background: #1a0a00;
+      border: 2px solid rgba(212,175,55,.6);
+      border-radius: 24px;
+      padding: 44px 40px;
+      max-width: 400px; width: 88%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.7);
+      animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .used-today-icon { font-size: 3rem; margin-bottom: 14px; }
+    .used-today-title {
+      font-size: 1.3rem; color: var(--gold); font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .used-today-msg {
+      font-size: .9rem; color: #d4b896; line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .used-today-timer {
+      font-size: .82rem; color: #9DC855;
+      margin-bottom: 20px;
+      min-height: 20px;
+    }
+    .btn-used-today {
+      padding: 12px 40px;
+      background: var(--red);
+      color: #fff; border: none; border-radius: 30px;
+      font-size: .95rem; font-weight: bold;
+      cursor: pointer; letter-spacing: .04em;
+      box-shadow: 0 4px 16px rgba(192,57,43,.4);
+      transition: transform .15s;
+    }
+    .btn-used-today:hover { transform: translateY(-2px); }
+    .wheel-container {
+      position: relative;
+      width: 380px; height: 380px;
+    }
+    /* Decorative ring */
+    .wheel-container::before {
+      content: '';
+      position: absolute;
+      inset: -14px;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--gold) 0deg, #8B6914 45deg, var(--gold) 90deg, #8B6914 135deg,
+        var(--gold) 180deg, #8B6914 225deg, var(--gold) 270deg, #8B6914 315deg, var(--gold) 360deg
+      );
+      z-index: 0;
+    }
+    .wheel-container::after {
+      content: '';
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      background: var(--dark);
+      z-index: 1;
+    }
+    canvas#wheel {
+      position: relative; z-index: 2;
+      border-radius: 50%;
+      display: block;
+      filter: drop-shadow(0 4px 24px rgba(0,0,0,.6));
+    }
+    /* Arrow pointer */
+    .pointer {
+      position: absolute;
+      top: -18px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: 0; height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 36px solid var(--red);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+    }
+    .pointer::after {
+      content: '';
+      position: absolute;
+      top: -38px; left: -9px;
+      width: 18px; height: 18px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 2.5px solid var(--gold);
+    }
+    /* Center hub */
+    .hub {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      z-index: 10;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff 0%, var(--gold) 60%, #8B6914 100%);
+      border: 3px solid var(--dark);
+      box-shadow: 0 2px 12px rgba(0,0,0,.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    /* SPIN button */
+    .btn-spin {
+      position: relative;
+      padding: 16px 54px;
+      font-family: 'Georgia', serif;
+      font-size: 1.15rem;
+      font-weight: bold;
+      letter-spacing: .06em;
+      color: var(--dark);
+      background: linear-gradient(135deg, #F5D060 0%, var(--gold) 50%, #A07820 100%);
+      border: none; border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(212,175,55,.4), inset 0 1px 0 rgba(255,255,255,.35);
+      transition: transform .15s, box-shadow .15s;
+      overflow: hidden;
+    }
+    .btn-spin::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,.18) 0%, transparent 60%);
+      border-radius: inherit;
+    }
+    .btn-spin:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(212,175,55,.55);
+    }
+    .btn-spin:active:not(:disabled) { transform: translateY(0); }
+    .btn-spin:disabled {
+      opacity: .45; cursor: not-allowed; transform: none;
+    }
+    .spin-counter {
+      font-size: .9rem;
+      color: #c8a86a;
+      letter-spacing: .04em;
+    }
+    .spin-counter strong { color: var(--gold); font-size: 1.1rem; }
+
+    /* ─────────────── RESULTS PANEL ─────────────── */
+    .results-panel {
+      width: 340px;
+      min-height: 420px;
+      background: rgba(255,255,255,.04);
+      border: 1.5px solid rgba(212,175,55,.25);
+      border-radius: 20px;
+      padding: 28px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .results-panel h2 {
+      font-size: 1.2rem;
+      color: var(--gold);
+      text-align: center;
+      border-bottom: 1px solid rgba(212,175,55,.2);
+      padding-bottom: 12px;
+      letter-spacing: .04em;
+    }
+    .result-slot {
+      background: rgba(0,0,0,.3);
+      border: 1.5px solid rgba(212,175,55,.15);
+      border-radius: 14px;
+      padding: 16px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: border-color .3s, background .3s;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-slot.filled {
+      border-color: rgba(212,175,55,.5);
+      background: rgba(212,175,55,.08);
+      animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .result-slot.clickable { cursor: pointer; }
+    .result-slot.clickable:hover {
+      border-color: rgba(212,175,55,.8);
+      background: rgba(212,175,55,.14);
+    }
+    .result-slot.chosen {
+      border-color: var(--gold);
+      background: rgba(212,175,55,.18);
+      box-shadow: 0 0 20px rgba(212,175,55,.3);
+    }
+    .result-slot.chosen::after {
+      content: '✓ Selected';
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold); font-size: .78rem; font-weight: bold;
+      letter-spacing: .05em;
+    }
+    @keyframes popIn {
+      0% { transform: scale(.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .slot-num {
+      width: 28px; height: 28px; min-width: 28px;
+      border-radius: 50%;
+      background: var(--red);
+      color: #fff;
+      font-size: .8rem; font-weight: bold;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .slot-img {
+      width: 60px; height: 60px;
+      min-width: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1.5px solid rgba(212,175,55,.3);
+      background: rgba(0,0,0,.2);
+    }
+    .slot-img.hidden { display: none; }
+    .slot-icon { font-size: 1.6rem; line-height: 1; }
+    .slot-info { flex: 1; min-width: 0; }
+    .slot-name { font-size: .82rem; color: var(--cream); font-weight: bold; line-height: 1.3; }
+    .slot-price {
+      font-size: .8rem; color: #9DC855; margin-top: 2px;
+    }
+    .slot-price.coupon { color: #F5A623; }
+    .slot-link {
+      display: inline-block;
+      margin-top: 5px;
+      font-size: .76rem;
+      color: #5BAFD6;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .slot-link:hover { color: #8DD3F5; border-bottom-color: #8DD3F5; }
+    .slot-link.hidden { display: none; }
+
+    /* Choose button */
+    .btn-choose {
+      margin-top: 5px;
+      padding: 5px 14px;
+      font-size: .78rem;
+      color: #fff;
+      background: var(--green);
+      border: 1.5px solid #2d8a50;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity .2s, transform .15s;
+      display: inline-block;
+    }
+    .btn-choose:hover { opacity: .85; transform: translateY(-1px); }
+
+    /* Claim card */
+    .claim-card {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      padding: 20px 16px;
+      background: rgba(30,107,60,.15);
+      border: 2px solid rgba(157,200,85,.4);
+      border-radius: 16px;
+      animation: popIn .5s ease;
+    }
+    .claim-card.visible { display: flex; }
+    .claim-card .claim-title {
+      font-size: 1rem; color: #9DC855; font-weight: bold;
+    }
+    .claim-card .claim-product {
+      font-size: 1.15rem; color: var(--cream);
+    }
+    .claim-card .claim-price {
+      font-size: 1.5rem; color: var(--gold); font-weight: bold;
+    }
+    .btn-claim {
+      padding: 12px 36px;
+      background: var(--red);
+      color: #fff; border: none; border-radius: 30px;
+      font-size: 1rem; font-weight: bold;
+      cursor: pointer; letter-spacing: .04em;
+      box-shadow: 0 4px 16px rgba(192,57,43,.45);
+      transition: transform .15s;
+    }
+    .btn-claim:hover { transform: translateY(-2px); }
+
+    /* ─────────────── INFO SECTION ─────────────── */
+    .info-section {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto 40px;
+      padding: 0 20px;
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      background: rgba(255,255,255,.04);
+      border: 1.5px solid rgba(212,175,55,.2);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .info-block {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 20px;
+      gap: 12px;
+      text-align: center;
+    }
+    .info-divider {
+      width: 1px;
+      background: rgba(212,175,55,.2);
+      min-height: 120px;
+      align-self: stretch;
+      margin: 20px 0;
+    }
+    .info-icon { font-size: 2rem; }
+    .info-label {
+      font-size: .8rem;
+      color: rgba(212,175,55,.7);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .store-btn {
+      display: inline-block;
+      padding: 10px 28px;
+      background: var(--red);
+      color: #fff;
+      border-radius: 30px;
+      font-size: .9rem;
+      font-weight: bold;
+      text-decoration: none;
+      letter-spacing: .04em;
+      box-shadow: 0 4px 16px rgba(192,57,43,.4);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .store-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(192,57,43,.5);
+      color: #fff;
+    }
+    .sales-block { gap: 14px; }
+    .sales-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+    .sales-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,0,0,.2);
+      border: 1px solid rgba(212,175,55,.12);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .sales-avatar {
+      width: 38px; height: 38px; min-width: 38px;
+      border-radius: 50%;
+      background: var(--red);
+      color: #fff;
+      font-size: .72rem; font-weight: bold;
+      display: flex; align-items: center; justify-content: center;
+      letter-spacing: .04em;
+    }
+    .sales-avatar.lt { background: var(--green); }
+    .sales-info { text-align: left; }
+    .sales-name {
+      font-size: .82rem; color: var(--cream); font-weight: bold;
+    }
+    .sales-contacts {
+      display: flex; gap: 10px; margin-top: 3px;
+    }
+    .contact-link {
+      font-size: .72rem; text-decoration: none;
+      border-radius: 8px; padding: 2px 7px;
+      transition: opacity .2s;
+    }
+    .contact-link:hover { opacity: .75; }
+    .contact-link.wa { color: #25D366; border: 1px solid rgba(37,211,102,.3); }
+    .contact-link.em { color: #5BAFD6; border: 1px solid rgba(91,175,214,.3); }
+    .slogan-block { gap: 10px; }
+    .slogan-text {
+      font-size: .88rem; color: var(--cream);
+      line-height: 1.7; font-style: italic;
+      letter-spacing: .02em;
+    }
+
+    @media (max-width: 680px) {
+      .info-section { flex-direction: column; }
+      .info-divider { width: 100%; height: 1px; min-height: auto; margin: 0; }
+      .sales-list { flex-direction: row; flex-wrap: wrap; }
+      .sales-card { flex: 1 1 130px; }
+    }
+
+    /* ─────────────── FOOTER ─────────────── */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 20px;
+      font-size: .78rem;
+      color: #6a5240;
+      border-top: 1px solid rgba(212,175,55,.1);
+    }
+
+    /* ─────────────── CONFETTI ─────────────── */
+    .confetti-piece {
+      position: fixed;
+      width: 10px; height: 10px;
+      top: -10px;
+      border-radius: 2px;
+      animation: confettiFall linear forwards;
+      z-index: 200;
+      pointer-events: none;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ─────────────── RESPONSIVE ─────────────── */
+    @media (max-width: 680px) {
+      .wheel-container { width: 300px; height: 300px; }
+      .results-panel { width: 100%; min-height: auto; }
+      .game-wrapper { gap: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header>
+  <div class="event-date-bar">
+    <span class="event-date-label">📅 Event Period:</span>
+    <span class="event-date-value" id="eventDateDisplay">—</span>
+    <button class="event-date-edit-btn" id="editDateBtn" title="Edit dates">✏️</button>
+    <div class="date-edit-panel hidden" id="dateEditPanel">
+      <div class="date-edit-row">
+        <label>From <input type="date" id="dateStartInput" /></label>
+        <label>To <input type="date" id="dateEndInput" /></label>
+      </div>
+      <div class="date-edit-actions">
+        <button class="event-date-save-btn" id="saveDateBtn">Save</button>
+        <button class="event-date-cancel-btn" id="cancelDateBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div class="header-badge">🀄 Spin &amp; Win Event</div>
+  <h1>Lucky Spin &amp; <span>Win!</span></h1>
+  <p class="subtitle">
+    Spin the wheel up to <strong>3 times</strong> — pick your favorite result
+    and grab a <strong>$55 Mahjong Set</strong> at a great deal!
+  </p>
+</header>
+
+<!-- ═══════════════ RULES STRIP ═══════════════ -->
+<div class="rules-strip">
+  <div class="rule-item"><span class="rule-icon">📅</span> <span id="ruleEventDate">—</span></div>
+  <div class="rule-item"><span class="rule-icon">🎯</span> 3 spins per session</div>
+  <div class="rule-item"><span class="rule-icon">🏆</span> Pick 1 favorite result</div>
+  <div class="rule-item"><span class="rule-icon">💵</span> All sets priced at $55</div>
+  <div class="rule-item"><span class="rule-icon">🔒</span> 1 spin per day</div>
+</div>
+
+<!-- ═══════════════ GAME AREA ═══════════════ -->
+<div class="game-wrapper">
+
+  <!-- Wheel -->
+  <div class="wheel-section">
+    <!-- Daily limit overlay -->
+    <div class="used-today-overlay hidden" id="usedTodayOverlay">
+      <div class="used-today-modal">
+        <div class="used-today-icon">⏳</div>
+        <div class="used-today-title">You've Already Spun Today!</div>
+        <div class="used-today-msg">Come back tomorrow for another chance to win.</div>
+        <div class="used-today-timer" id="usedTodayTimer"></div>
+        <button class="btn-used-today" onclick="closeUsedTodayOverlay()">Got It</button>
+      </div>
+    </div>
+
+    <!-- Event inactive overlay -->
+    <div class="used-today-overlay hidden" id="eventInactiveOverlay">
+      <div class="used-today-modal">
+        <div class="used-today-icon" id="eventInactiveIcon">⏰</div>
+        <div class="used-today-title" id="eventInactiveTitle">Event Not Active</div>
+        <div class="used-today-msg" id="eventInactiveMsg"></div>
+        <button class="btn-used-today" onclick="closeEventInactive()">Got It</button>
+      </div>
+    </div>
+
+    <div class="wheel-container">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="380" height="380"></canvas>
+      <div class="hub">🀄</div>
+    </div>
+
+    <div class="spin-counter">
+      Spins used: <strong id="spinsUsed">0</strong> / 3
+    </div>
+
+    <button class="btn-spin" id="btnSpin" onclick="doSpin()">
+      🎰 &nbsp;SPIN THE WHEEL
+    </button>
+  </div>
+
+  <!-- Results -->
+  <div class="results-panel" id="resultsPanel">
+    <h2>🎁 Your Results</h2>
+
+    <div class="result-slot" id="slot0">
+      <div class="slot-num">1</div>
+      <img class="slot-img hidden" id="img0" alt="product" />
+      <div class="slot-info">
+        <div class="slot-name" id="name0">Spin to reveal…</div>
+        <div class="slot-price" id="price0"></div>
+        <a class="slot-link hidden" id="link0" href="#" target="_blank">👁 View Product →</a>
+      </div>
+    </div>
+
+    <div class="result-slot" id="slot1">
+      <div class="slot-num">2</div>
+      <img class="slot-img hidden" id="img1" alt="product" />
+      <div class="slot-info">
+        <div class="slot-name" id="name1">Spin to reveal…</div>
+        <div class="slot-price" id="price1"></div>
+        <a class="slot-link hidden" id="link1" href="#" target="_blank">👁 View Product →</a>
+      </div>
+    </div>
+
+    <div class="result-slot" id="slot2">
+      <div class="slot-num">3</div>
+      <img class="slot-img hidden" id="img2" alt="product" />
+      <div class="slot-info">
+        <div class="slot-name" id="name2">Spin to reveal…</div>
+        <div class="slot-price" id="price2"></div>
+        <a class="slot-link hidden" id="link2" href="#" target="_blank">👁 View Product →</a>
+      </div>
+    </div>
+
+    <!-- Claim card (shown after choosing) -->
+    <div class="claim-card" id="claimCard">
+      <div class="claim-title">🎉 Congratulations!</div>
+      <div class="claim-product" id="claimProduct"></div>
+      <div class="claim-price" id="claimPrice"></div>
+      <button class="btn-claim" onclick="doClaim()">🛒 View Product &amp; Contact Us →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ INFO SECTION ═══════════════ -->
+<section class="info-section">
+  <div class="info-block">
+    <div class="info-icon">🏪</div>
+    <div class="info-label">Our Alibaba Store</div>
+    <a class="store-btn" href="https://cddtjl.en.alibaba.com/?spm=a2700.micro_cgs_home.0.0.1f6f3e5ftyOI3l" target="_blank">
+      Visit Store →
+    </a>
+  </div>
+
+  <div class="info-divider"></div>
+
+  <div class="info-block sales-block">
+    <div class="info-icon">👥</div>
+    <div class="info-label">Our Sales Team</div>
+    <div class="sales-list">
+      <div class="sales-card">
+        <div class="sales-avatar">YD</div>
+        <div class="sales-info">
+          <div class="sales-name">Yang Du</div>
+          <div class="sales-contacts">
+            <a class="contact-link wa" href="https://wa.me/8615680787706" target="_blank">💬 WhatsApp</a>
+            <a class="contact-link em" href="mailto:yangdu26@gmail.com">✉️ Gmail</a>
+          </div>
+        </div>
+      </div>
+      <div class="sales-card">
+        <div class="sales-avatar lt">LT</div>
+        <div class="sales-info">
+          <div class="sales-name">Leslie Tang</div>
+          <div class="sales-contacts">
+            <a class="contact-link wa" href="https://wa.me/8613908093074" target="_blank">💬 WhatsApp</a>
+            <a class="contact-link em" href="mailto:tangbaoshan25@gmail.com">✉️ Gmail</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-divider"></div>
+
+  <div class="info-block slogan-block">
+    <div class="info-icon">✨</div>
+    <div class="slogan-text">Within our capability,<br>we serve every customer<br>with full dedication</div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  © 2026 Chengdu Du Tang Jin Li Technology Co., Ltd. &nbsp;·&nbsp; All prices in USD
+</footer>
+
+
+
+
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+/* ──────────────────────────────────────────
+   WHEEL SEGMENTS  — customize freely!
+   weight: winning probability (higher = more likely)
+   probability = weight / sum(all weights)
+────────────────────────────────────────── */
+const SEGMENTS = [
+  { name: "Gray Blue American Mahjong Tiles Four Layer",   img: "https://sc04.alicdn.com/kf/Ha5bbb51f55c34b0394caa6909105ebc3s.jpg", type: "product", value: "$55.00", bg: "#C0392B", fg: "#FFE57A", weight: 12, link: "https://www.alibaba.com/product-detail/Luxury-Gray-Blue-American-Mahjong-Tiles_1601707895689.html?spm=a2700.shop_pl.41413.1.1d8d7121EZtvzw" },
+  { name: "Luxury Olive Green American Mahjong Tiles",      img: "https://sc04.alicdn.com/kf/Hc3c31a7c699348469b6e81a75e6d5faez.jpg", type: "product", value: "$55.00", bg: "#1E6B3C", fg: "#FFFFFF", weight: 12, link: "https://www.alibaba.com/product-detail/Luxury-Olive-Green-American-Mahjong-Tiles_1601739149928.html?spm=a2700.shop_pl.41413.5.1d8d7121EZtvzw" },
+  { name: "Wholesale American Mahjong Set 160 Tiles",       img: "https://sc04.alicdn.com/kf/Haf7ea380207e4635a198cb3b19f4d89cJ.png", type: "product", value: "$55.00", bg: "#8B3A3A", fg: "#FFE57A", weight: 12, link: "https://www.alibaba.com/product-detail/Wholesale-American-Mahjong-Set-160-Tiles_1601706626160.html?spm=a2700.shop_pl.41413.20.1d8d7121EZtvzw" },
+  { name: "Emerald Lucky Series Acrylic Mahjong Set",       img: "https://sc04.alicdn.com/kf/Hf0317454f8814fefb14a1ff1fd3e9a72U.jpg", type: "product", value: "$55.00", bg: "#2E4A1E", fg: "#FFFFFF", weight: 12, link: "https://www.alibaba.com/product-detail/American-High-Quality-Emerald-Lucky-Series_1601749801825.html?spm=a2700.shop_pl.41413.35.1d8d7121EZtvzw" },
+  { name: "Double-Layer Golden 160pcs Acrylic Mahjong",      img: "https://sc04.alicdn.com/kf/H948dd793dd474c59b037ae5ef49c919eW.png", type: "product", value: "$55.00", bg: "#6B2020", fg: "#FFE57A", weight: 6, link: "https://www.alibaba.com/product-detail/New-Double-Layer-Golden-160pcs-Acrylic_1601749099240.html?spm=a2700.shop_pl.41413.26.1d8d7121EZtvzw" },
+  { name: "Luxury Blue Striped American Mahjong Set",        img: "https://sc04.alicdn.com/kf/Hf0aba1d2808d446ea3456fb00fd448dem.png", type: "product", value: "$55.00", bg: "#1B3A2A", fg: "#FFFFFF", weight: 6, link: "https://www.alibaba.com/product-detail/Custom-Luxury-Blue-Striped-American-Mahjong_1601740015413.html?spm=a2700.shop_pl.41413.45.1d8d7121EZtvzw" },
+  { name: "Luxury Engraved Acrylic Mahjong Tiles Set",      img: "https://sc04.alicdn.com/kf/Hed08f107d82b4e36b8a64b00af72818eG.png", type: "product", value: "$55.00", bg: "#922B21", fg: "#FFE57A", weight: 6, link: "https://www.alibaba.com/product-detail/Luxury-Engraved-Acrylic-American-Mahjong-Tiles_1601764814701.html?spm=a2700.shop_pl.41413.38.1d8d7121EZtvzw" },
+  { name: "Luxury Pink Monkey American Mahjong Set",        img: "https://sc04.alicdn.com/kf/Hc7834aa6b73443aaba3d82a2dd074634O.png", type: "product", value: "$55.00", bg: "#1A4A2E", fg: "#FFFFFF", weight: 6, link: "https://www.alibaba.com/product-detail/Luxury-Pink-Monkey-American-Mahjong-Set_1601749847956.html?spm=a2700.shop_pl.41413.48.1d8d7121EZtvzw" },
+];
+
+/* ─── State ─── */
+let spinning = false;
+let spinsUsed = 0;
+const maxSpins = 3;
+const results = [];
+let chosenIdx = -1;
+let currentAngle = 0; // running rotation (degrees)
+
+/* ─── Canvas wheel ─── */
+const canvas = document.getElementById('wheel');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const cx = W / 2, cy = H / 2, R = W / 2 - 4;
+
+// Pre-load product images
+const wheelImages = SEGMENTS.map(seg => {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = seg.img || '';
+  return img;
+});
+
+// Placeholder mahjong icon image (drawn via canvas)
+let placeholderImg = null;
+(function buildPlaceholder() {
+  const phCanvas = document.createElement('canvas');
+  phCanvas.width = 80; phCanvas.height = 80;
+  const phCtx = phCanvas.getContext('2d');
+  // Circle bg
+  phCtx.beginPath();
+  phCtx.arc(40, 40, 38, 0, Math.PI * 2);
+  phCtx.fillStyle = '#D4AF37';
+  phCtx.fill();
+  // Text
+  phCtx.fillStyle = '#1A0A00';
+  phCtx.font = '36px serif';
+  phCtx.textAlign = 'center';
+  phCtx.textBaseline = 'middle';
+  phCtx.fillText('🀄', 40, 40);
+  placeholderImg = phCanvas;
+})();
+
+function drawWheel(rotation) {
+  ctx.clearRect(0, 0, W, H);
+  const n = SEGMENTS.length;
+  const arc = (2 * Math.PI) / n;
+
+  SEGMENTS.forEach((seg, i) => {
+    const start = rotation + i * arc - Math.PI / 2;
+    const end   = start + arc;
+    const mid   = start + arc / 2;
+
+    // Slice background
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, start, end);
+    ctx.closePath();
+    ctx.fillStyle = seg.bg;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(212,175,55,.6)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Draw product image as circle in the middle of the slice
+    ctx.save();
+    // Position: radius ~52% of wheel radius from center
+    const imgR = R * 0.52;
+    const ix   = cx + imgR * Math.cos(mid);
+    const iy   = cy + imgR * Math.sin(mid);
+    const d    = R * 0.25; // circle diameter — fits fully inside each 45° slice
+
+    // Circular clip
+    ctx.beginPath();
+    ctx.arc(ix, iy, d, 0, Math.PI * 2);
+    ctx.clip();
+
+    // White bg
+    ctx.beginPath();
+    ctx.arc(ix, iy, d, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    // Draw image or placeholder
+    const imgObj = (seg.img && seg.img.trim()) ? wheelImages[i] : null;
+    if (imgObj && imgObj.complete && imgObj.naturalWidth > 0) {
+      // Scale to fill circle (cover)
+      const scale = Math.max(d * 2 / imgObj.naturalWidth, d * 2 / imgObj.naturalHeight);
+      const iw = imgObj.naturalWidth * scale;
+      const ih = imgObj.naturalHeight * scale;
+      ctx.drawImage(imgObj, ix - iw / 2, iy - ih / 2, iw, ih);
+    } else {
+      // Draw placeholder
+      ctx.drawImage(placeholderImg, ix - d, iy - d, d * 2, d * 2);
+    }
+
+    ctx.restore();
+  });
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'rgba(212,175,55,.9)';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+}
+
+drawWheel(0);
+
+// Redraw wheel once all images finish loading
+let imagesReady = 0;
+SEGMENTS.forEach((seg, i) => {
+  if (seg.img && seg.img.trim()) {
+    wheelImages[i].onload = () => {
+      imagesReady++;
+      if (imagesReady > 0) drawWheel(currentAngle * Math.PI / 180);
+    };
+    wheelImages[i].onerror = () => {
+      imagesReady++;
+    };
+  }
+});
+
+/* ─── Spin logic ─── */
+function doSpin() {
+  if (spinning || spinsUsed >= maxSpins) return;
+  if (!isEventActive()) {
+    const today = TODAY_S();
+    showEventInactive(today < getStartDate() ? 'before' : 'after');
+    return;
+  }
+  if (checkUsedToday()) {
+    showUsedTodayOverlay();
+    return;
+  }
+
+  spinning = true;
+  document.getElementById('btnSpin').disabled = true;
+
+  // Weighted random target segment
+  const weights = SEGMENTS.map(s => s.weight || 1);
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  let rand = Math.random() * totalWeight;
+  let targetIdx = 0;
+  for (let i = 0; i < SEGMENTS.length; i++) {
+    rand -= weights[i];
+    if (rand <= 0) { targetIdx = i; break; }
+  }
+  const n = SEGMENTS.length;
+  const arc = 360 / n; // degrees
+  // Extra full rotations (5–8) for satisfying spin
+  const extraRot = (5 + Math.floor(Math.random() * 4)) * 360;
+  // Angle so pointer (top) lands in center of targetIdx segment
+  const targetDeg = 360 - ((targetIdx * arc + arc / 2) % 360);
+  const totalRot  = extraRot + targetDeg - (currentAngle % 360);
+
+  const duration = 4000 + Math.random() * 1500; // ms
+  const startTime = performance.now();
+  const startAngle = currentAngle;
+
+  function ease(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function frame(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    currentAngle = startAngle + totalRot * ease(t);
+    drawWheel((currentAngle * Math.PI) / 180);
+
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      currentAngle = startAngle + totalRot;
+      spinning = false;
+      spinsUsed++;
+      markUsedToday(); // lock for today
+      document.getElementById('spinsUsed').textContent = spinsUsed;
+
+      // Record result
+      results.push(targetIdx);
+      updateSlot(spinsUsed - 1, targetIdx);
+
+      // Re-enable or update button
+      if (spinsUsed < maxSpins) {
+        document.getElementById('btnSpin').disabled = false;
+        document.getElementById('btnSpin').textContent = '🎰  SPIN AGAIN';
+      } else {
+        document.getElementById('btnSpin').textContent = '✅  All Spins Used';
+        // Show choose buttons
+        showChooseButtons();
+      }
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ─── Update a result slot (show image + link after spin) ─── */
+function updateSlot(idx, segIdx) {
+  const seg = SEGMENTS[segIdx];
+  const slotEl = document.getElementById('slot' + idx);
+  slotEl.classList.add('filled');
+
+  // Show product image
+  const imgEl = document.getElementById('img' + idx);
+  if (seg.img && seg.img.trim()) {
+    imgEl.src = seg.img;
+    imgEl.classList.remove('hidden');
+  } else {
+    imgEl.classList.add('hidden');
+  }
+
+  document.getElementById('name' + idx).textContent = seg.name;
+  const priceEl = document.getElementById('price' + idx);
+  priceEl.textContent = seg.value;
+  priceEl.className = 'slot-price' + (seg.type === 'coupon' ? ' coupon' : '');
+
+  // Show "View Product" link
+  const linkEl = document.getElementById('link' + idx);
+  linkEl.href = seg.link || '#';
+  linkEl.classList.remove('hidden');
+
+  // Make the whole slot clickable to open the product page
+  slotEl.classList.add('clickable');
+  slotEl.onclick = function(e) {
+    // Don't open if clicking the Choose button
+    if (e.target.classList.contains('btn-choose')) return;
+    if (seg.link && seg.link !== '#') {
+      window.open(seg.link, '_blank');
+    }
+  };
+}
+
+/* ─── Show choose buttons after 3 spins ─── */
+function showChooseButtons() {
+  for (let i = 0; i < 3; i++) {
+    if (results[i] === undefined) continue;
+    const slot = document.getElementById('slot' + i);
+    const btn = document.createElement('button');
+    btn.className = 'btn-choose';
+    btn.textContent = '✓ Choose This';
+    btn.dataset.idx = i;
+    btn.onclick = function() { chooseResult(parseInt(this.dataset.idx)); };
+    slot.querySelector('.slot-info').appendChild(btn);
+  }
+}
+
+/* ─── Choose a result ─── */
+function chooseResult(idx) {
+  if (chosenIdx !== -1) return;
+  chosenIdx = idx;
+
+  const seg = SEGMENTS[results[idx]];
+
+  // Style slots
+  for (let i = 0; i < 3; i++) {
+    const slot = document.getElementById('slot' + i);
+    if (i === idx) {
+      slot.classList.add('chosen');
+    } else {
+      slot.style.opacity = '.45';
+    }
+    // Remove choose buttons
+    const btn = slot.querySelector('.btn-choose');
+    if (btn) btn.remove();
+  }
+
+  // Show claim card
+  document.getElementById('claimProduct').textContent = seg.name;
+  document.getElementById('claimPrice').textContent = seg.value;
+  document.getElementById('claimCard').classList.add('visible');
+  document.getElementById('claimCard').dataset.link = seg.link || '#';
+
+  // Immediately show the screenshot reminder modal
+  showScreenshotReminder(seg.name, seg.value);
+}
+
+/* ─── Claim / redirect to product page ─── */
+function doClaim() {
+  const seg = SEGMENTS[results[chosenIdx]];
+  const link = seg.link || document.getElementById('claimCard').dataset.link;
+  if (link && link !== '#') {
+    window.open(link, '_blank');
+  }
+}
+
+/* ─── Screenshot reminder modal ─── */
+function showScreenshotReminder(productName, productPrice) {
+  // Overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,.8);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Georgia', serif;
+  `;
+  overlay.onclick = function(e) {
+    if (e.target === overlay) closeModal();
+  };
+
+  // Card
+  const card = document.createElement('div');
+  card.style.cssText = `
+    background: #1a0a00;
+    border: 2px solid #D4AF37;
+    border-radius: 24px;
+    padding: 44px 40px;
+    max-width: 460px; width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.7);
+    position: relative;
+  `;
+
+  card.innerHTML = `
+    <div style="font-size:3.2rem; margin-bottom:16px;">📋</div>
+    <h2 style="color:#D4AF37; font-size:1.5rem; margin-bottom:10px;">Almost There!</h2>
+    <p style="color:#d4b896; font-size:.95rem; line-height:1.7; margin-bottom:22px;">
+      Your selected product:
+      <br><strong style="color:#FDF6E3; font-size:1.05rem;">${productName}</strong>
+      <br><strong style="color:#9DC855; font-size:1.2rem;">${productPrice}</strong>
+    </p>
+    <div style="
+      background: rgba(192,57,43,.15);
+      border: 1.5px solid rgba(192,57,43,.5);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      text-align: left;
+    ">
+      <p style="color:#f0c0a0; font-size:.9rem; line-height:1.8; margin:0;">
+        📸 <strong>Please take a screenshot</strong> of this page showing your spin result.<br><br>
+        💬 <strong>Contact us on Alibaba</strong> and send the screenshot to our customer service.<br><br>
+        ✏️ Our team will create a <strong>custom order</strong> and adjust the price to <strong>$55.00</strong> for you.
+      </p>
+    </div>
+    <button id="modalGoBtn" style="
+      width: 100%;
+      padding: 13px 0;
+      background: #C0392B;
+      color: #fff;
+      border: none; border-radius: 30px;
+      font-size: 1rem; font-weight: bold;
+      cursor: pointer; letter-spacing: .04em;
+      box-shadow: 0 4px 16px rgba(192,57,43,.45);
+      transition: transform .15s;
+    ">🛒 View Product &amp; Contact Us</button>
+    <button id="modalCloseBtn" style="
+      margin-top: 10px;
+      width: 100%;
+      padding: 10px 0;
+      background: transparent;
+      color: #6a5240;
+      border: 1px solid rgba(212,175,55,.25);
+      border-radius: 20px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    ">Close</button>
+  `;
+
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+
+  // Center the close button text
+  card.querySelector('#modalCloseBtn').style.cssText += ';color:#6a5240;';
+
+  document.getElementById('modalGoBtn').onclick = function() {
+    closeModal();
+    // open the product link
+    const seg = SEGMENTS[results[chosenIdx]];
+    if (seg && seg.link && seg.link !== '#') {
+      window.open(seg.link, '_blank');
+    }
+  };
+
+  document.getElementById('modalCloseBtn').onclick = closeModal;
+
+  function closeModal() {
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity .3s';
+    setTimeout(() => overlay.remove(), 300);
+  }
+
+  // Confetti!
+  launchConfetti();
+}
+
+/* ─── Confetti ─── */
+function launchConfetti() {
+  const colors = ['#D4AF37','#C0392B','#9DC855','#FFFFFF','#F5A623'];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      animation-duration: ${1.5 + Math.random() * 2}s;
+      animation-delay: ${Math.random() * .8}s;
+      transform: rotate(${Math.random() * 360}deg);
+      border-radius: ${Math.random() > .5 ? '50%' : '2px'};
+      width: ${6 + Math.random() * 8}px;
+      height: ${6 + Math.random() * 8}px;
+    `;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+/* ─── Activity Date Range ─── */
+const START_KEY = 'mahjong_event_start';
+const END_KEY   = 'mahjong_event_end';
+const TODAY_S = () => new Date().toISOString().slice(0, 10);
+
+function getStartDate() { return localStorage.getItem(START_KEY) || '2026-05-17'; }
+function getEndDate()   { return localStorage.getItem(END_KEY)   || '2026-06-17'; }
+
+function isEventActive() {
+  const today = TODAY_S();
+  return today >= getStartDate() && today <= getEndDate();
+}
+
+function showEventInactive(type) {
+  // type: 'before' | 'after'
+  const overlay = document.getElementById('eventInactiveOverlay');
+  const icon    = document.getElementById('eventInactiveIcon');
+  const title   = document.getElementById('eventInactiveTitle');
+  const msg     = document.getElementById('eventInactiveMsg');
+
+  if (type === 'before') {
+    icon.textContent = '⏰';
+    title.textContent = 'Event Has Not Started Yet!';
+    const d = new Date(getStartDate());
+    msg.textContent = `This event starts on ${d.toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}. Please come back then!`;
+  } else {
+    icon.textContent = '🏁';
+    title.textContent = 'Event Has Ended!';
+    const d = new Date(getEndDate());
+    msg.textContent = `This event ran from ${new Date(getStartDate()).toLocaleDateString('en-US',{month:'long',day:'numeric'})} to ${d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}. Thank you for your interest!`;
+  }
+  overlay.classList.remove('hidden');
+}
+function closeEventInactive() {
+  document.getElementById('eventInactiveOverlay').classList.add('hidden');
+}
+
+function updateDateDisplay() {
+  const start = getStartDate();
+  const end   = getEndDate();
+  const display = document.getElementById('eventDateDisplay');
+  display.textContent = `${start}  →  ${end}`;
+  document.getElementById('ruleEventDate').textContent = `📅 ${start}  →  ${end}`;
+
+  if (isEventActive()) {
+    display.classList.remove('inactive');
+  } else {
+    display.classList.add('inactive');
+  }
+}
+
+(function initEventDate() {
+  updateDateDisplay();
+  document.getElementById('dateStartInput').value = getStartDate();
+  document.getElementById('dateEndInput').value   = getEndDate();
+})();
+
+document.getElementById('editDateBtn').onclick = function() {
+  document.getElementById('dateEditPanel').classList.remove('hidden');
+  document.getElementById('dateStartInput').value = getStartDate();
+  document.getElementById('dateEndInput').value   = getEndDate();
+};
+document.getElementById('saveDateBtn').onclick = function() {
+  const s = document.getElementById('dateStartInput').value;
+  const e = document.getElementById('dateEndInput').value;
+  if (s) localStorage.setItem(START_KEY, s);
+  if (e) localStorage.setItem(END_KEY, e);
+  document.getElementById('dateEditPanel').classList.add('hidden');
+  updateDateDisplay();
+};
+document.getElementById('cancelDateBtn').onclick = function() {
+  document.getElementById('dateEditPanel').classList.add('hidden');
+};
+
+/* ─── Daily Limit ─── */
+const DAY_KEY = 'mahjong_daily_date';
+function getTodayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+function checkUsedToday() {
+  return localStorage.getItem(DAY_KEY) === getTodayStr();
+}
+function markUsedToday() {
+  localStorage.setItem(DAY_KEY, getTodayStr());
+}
+
+function showUsedTodayOverlay() {
+  const overlay = document.getElementById('usedTodayOverlay');
+  overlay.classList.remove('hidden');
+  startCountdown();
+}
+function closeUsedTodayOverlay() {
+  document.getElementById('usedTodayOverlay').classList.add('hidden');
+}
+
+/* Countdown to midnight */
+function startCountdown() {
+  const el = document.getElementById('usedTodayTimer');
+  function tick() {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const diff = tomorrow - now;
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    el.textContent = `Resets in ${h}h ${m}m ${s}s`;
+  }
+  tick();
+  const timer = setInterval(() => {
+    if (document.getElementById('usedTodayOverlay').classList.contains('hidden')) {
+      clearInterval(timer); return;
+    }
+    tick();
+  }, 1000);
+}
+
+/* ─── Init ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  if (!isEventActive()) {
+    const today = TODAY_S();
+    document.getElementById('btnSpin').disabled = true;
+    document.getElementById('btnSpin').textContent = today < getStartDate() ? '⏰ Event Not Started' : '🏁 Event Ended';
+    showEventInactive(today < getStartDate() ? 'before' : 'after');
+    return;
+  }
+  if (checkUsedToday()) {
+    document.getElementById('btnSpin').disabled = true;
+    document.getElementById('btnSpin').textContent = '⏳ Already Spun Today';
+    showUsedTodayOverlay();
+  }
+});
+
+</script>
+</body>
+</html>
