@@ -707,9 +707,15 @@
     }
 
     /* ─────────────── RESPONSIVE ─────────────── */
+    /* 手机端：用 transform scale 整体缩放，canvas 内部坐标不变，图片/外圈/指针全部同步缩小 */
+    .wheel-section { --wheel-scale: 1; }
+    .wheel-container {
+      transform-origin: top center;
+      transform: scale(var(--wheel-scale));
+      margin-bottom: calc((var(--wheel-scale) - 1) * 380px);  /* 补偿缩小后留白 */
+    }
     @media (max-width: 680px) {
-      .wheel-container { width: min(340px, calc(100vw - 40px)); height: min(340px, calc(100vw - 40px)); }
-      canvas#wheel { width: 100%; height: 100%; }
+      .wheel-section { --wheel-scale: calc((100vw - 40px) / 380); }
       .results-panel { width: 100%; min-height: auto; }
       .game-wrapper { gap: 28px; }
     }
@@ -936,24 +942,11 @@ let currentAngle = 0; // running rotation (degrees)
 /* ─── Canvas wheel ─── */
 const canvas = document.getElementById('wheel');
 const ctx    = canvas.getContext('2d');
+canvas.width  = 380;
+canvas.height = 380;
 
-// 动态计算画布尺寸，适配手机端
-function getWheelSize() {
-  return Math.min(380, window.innerWidth - 40);
-}
-function resizeCanvas() {
-  const size = getWheelSize();
-  canvas.width  = size;
-  canvas.height = size;
-  // 同步容器尺寸
-  const container = document.getElementById('wheelContainer');
-  container.style.width  = size + 'px';
-  container.style.height = size + 'px';
-}
-resizeCanvas();
-
-let W = canvas.width, H = canvas.height;
-let cx = W / 2, cy = H / 2, R = W / 2 - 4;
+const W = 380, H = 380;
+const cx = W / 2, cy = H / 2, R = W / 2 - 4;
 
 // Pre-load product images
 const wheelImages = SEGMENTS.map(seg => {
@@ -984,9 +977,6 @@ let placeholderImg = null;
 })();
 
 function drawWheel(rotation) {
-  // 每次绘制时重新读取尺寸，确保缩放正确
-  W = canvas.width; H = canvas.height;
-  cx = W / 2; cy = H / 2; R = W / 2 - 4;
   ctx.clearRect(0, 0, W, H);
   const n = SEGMENTS.length;
   const arc = (2 * Math.PI) / n;
@@ -1052,13 +1042,6 @@ function drawWheel(rotation) {
 
 drawWheel(0);
 
-// 窗口大小变化时（横竖屏切换）自动重绘
-window.addEventListener('resize', () => {
-  if (!spinning) {
-    resizeCanvas();
-    drawWheel(currentAngle * Math.PI / 180);
-  }
-});
 
 // Redraw wheel once all images finish loading
 let imagesReady = 0;
@@ -1508,9 +1491,6 @@ function startCountdown() {
     tick();
   }, 1000);
 }
-
-// Double-click eventDateDisplay to trigger password modal
-document.getElementById('eventDateDisplay').addEventListener('dblclick', showPasswordModal);
 
 /* ─── Init ─── */
 window.addEventListener('DOMContentLoaded', () => {
